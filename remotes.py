@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
-"""Discover information regarding available Chrome Developer Tools remote
-debuggers.
-"""
+"""Discover information regarding available Chrome Developer Tools remote debuggers."""
 
 from pprint import pprint as pp
 import argparse
@@ -12,9 +10,7 @@ import urlparse
 
 
 def get_web_socket_urls(url, domain=None):
-    """Get a list of WebSocket URLs available at the given URL.  Optionally
-    only yield those from a given domain.
-    """
+    """Get a list of WebSocket URLs available at the given URL.  Optionally only yield those from a given domain."""
     parsed_url = urlparse.urlparse(url)
     url = urlparse.urlunparse((parsed_url[0], parsed_url[1], "json", "", "", ""))
     web_socket_urls = []
