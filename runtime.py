@@ -78,40 +78,20 @@ def get_enumerable_results(response):
     return [r for r in response["result"]["result"] if r["enumerable"]]
 
 
-def on_message(ws, message):
-    m = json.loads(message)
-    method = m.get("method")
-    if method:
-        if method == "Inspector.detached":
-            if m["params"]["reason"] == "replaced_with_devtools":
-                sys.exit("Chrome Developer Tools stole the WebSocket!")
-            else:
-                sys.exit("This connection has been closed.")
-        print pp(m)
-
-
-def on_error(ws, error):
-    print error
-
-
-def on_close(ws):
-    print "The Chrome Developer Tools Inspector WebSocket has been closed."
-
-
-def on_open(ws):
-    def run(*args):
-        ws.send(get_clear_console_request())
-        ws.send(get_enable_console_request())
-        time.sleep(1)
-        #expression = "mps.newegg.common.getIndexThumbnails();"
-        expression = """
-var d = {};
-var f = function() {};
-mps.newegg.common.collectProductPage(d, f);
-console.log(d);
-"""
-        ws.send(get_eval_request(expression));
-    threading.Thread(target=run).start()
+def receive(*args):
+    ws = args[0]
+    while True:
+        message = json.loads(ws.recv())
+        print pp(message)
+        method = message.get("method")
+        if method:
+            if method == "Inspector.detached":
+                if message["params"]["reason"] == "replaced_with_devtools":
+                    print "Chrome Developer Tools stole the WebSocket!"
+                else:
+                    print "This connection has been closed."
+                return
+            print pp(message)
 
 
 if __name__ == "__main__":
@@ -124,12 +104,31 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     ws_urls = remotes.get_web_socket_urls(args.url, args.domain)
+
     if not ws_urls:
         sys.exit("No Chrome Developer Tools remote debugger WebSocket URLs are available.")
+
     ws_url = ws_urls[0]
+    ws = websocket.create_connection(ws_url)
     websocket.enableTrace(args.trace)
 
-    websocket.WebSocketApp(ws_url, on_open, on_message, on_error, on_close).run_forever()
+    thread = threading.Thread(target=receive, args=(ws,))
+    thread.daemon = True
+    thread.start()
+
+    ws.send(get_clear_console_request())
+    ws.send(get_enable_console_request())
+    time.sleep(1)
+    expression = """
+var d = {};
+var f = function() {};
+mps.newegg.common.collectProductPage(d, f);
+console.log(d);
+"""
+    ws.send(get_eval_request(expression));
+
+    thread.join()
+
 
 #     print "yo!"
 #     time.sleep(2)
