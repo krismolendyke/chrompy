@@ -115,7 +115,7 @@ if __name__ == "__main__":
     ws.send(get_clear_console_request())
     ws.send(get_enable_console_request())
 
-    expression = args.expression or sys.stdin.readline().strip()
+    expression = args.expression or " ".join([l.strip() for l in sys.stdin])
 
     if args.run_forever:
         console = code.InteractiveConsole()
