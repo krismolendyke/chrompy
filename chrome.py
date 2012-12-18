@@ -30,7 +30,8 @@ if __name__ == "__main__":
                         help="The remote debugging port.  Defaults to 1337.",
                         default=1337)
     parser.add_argument("--profile-dir",
-                        help="A directory to store an alternate user profile within.  Defaults to ~/chrome-remote-profile.",
+                        help="A directory to store an alternate user profile within.  " +
+                        "Defaults to ~/chrome-remote-profile.",
                         default=os.path.expanduser(os.path.join("~", "chrome-remote-profile")))
     parser.add_argument("--canary",
                         help="Launch a Google Chrome Canary instance.",

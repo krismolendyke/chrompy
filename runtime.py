@@ -17,7 +17,7 @@ import remotes
 
 def get_request(method, params=None):
     """Get a string representing a request."""
-    request = { "id": 0, "method": method }
+    request = {"id": 0, "method": method}
     if params:
         request["params"] = params
     return json.dumps(request)
@@ -84,7 +84,8 @@ def receive(*args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__.strip())
     parser.add_argument("--url",
-                        help="A URL to query for Chrome Developer Tools remote debugger information.  Defaults to http://localhost:1337",
+                        help="A URL to query for Chrome Developer Tools remote debugger information.  " +
+                        "Defaults to http://localhost:1337",
                         default="http://localhost:1337")
     parser.add_argument("--expression", help="A JavaScript expression to evaluate in a Chrome runtime.")
     parser.add_argument("--timeout",
@@ -126,5 +127,5 @@ if __name__ == "__main__":
             except EOFError:
                 sys.exit("--run-forever is currently not supported in combination with piped input.")
     else:
-        ws.send(get_eval_request(expression));
+        ws.send(get_eval_request(expression))
         thread.join(args.timeout)

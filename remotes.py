@@ -2,7 +2,6 @@
 
 """Discover information regarding available Chrome Developer Tools remote debuggers."""
 
-from pprint import pprint as pp
 import argparse
 import requests
 import sys
@@ -39,7 +38,8 @@ def get_web_socket_urls(url, domain=None):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__.strip())
     parser.add_argument("--url",
-                        help="A URL to query for Chrome Developer Tools remote debugger information.  Defaults to http://localhost:1337",
+                        help="A URL to query for Chrome Developer Tools remote debugger information.  " +
+                        "Defaults to http://localhost:1337",
                         default="http://localhost:1337")
     parser.add_argument("--domain", help="A domain used to limit the search.")
     args = parser.parse_args()
