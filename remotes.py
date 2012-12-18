@@ -9,16 +9,22 @@ import sys
 import urlparse
 
 
+def get_json_url(url):
+    """Get a URL for the Chrome Developer Tools JSON remote debugging meta info."""
+    split_url = urlparse.urlsplit(url)
+    scheme, netloc = split_url[:2]
+    assert scheme and netloc, "Please specify a valid URL format, e.g. http://localhost:1337"
+    return urlparse.urlunsplit((scheme, netloc, "json", "", ""))
+
+
 def get_web_socket_urls(url, domain=None):
     """Get a list of WebSocket URLs available at the given URL.  Optionally only yield those from a given domain."""
-    parsed_url = urlparse.urlparse(url)
-    url = urlparse.urlunparse((parsed_url[0], parsed_url[1], "json", "", "", ""))
+    url = get_json_url(url)
     web_socket_urls = []
     try:
         r = requests.get(url)
         if r.status_code == requests.codes.OK:
-            for i in [u for u in r.json if "webSocketDebuggerUrl" in u and
-                    u["url"].startswith("http")]:
+            for i in [u for u in r.json if "webSocketDebuggerUrl" in u and u["url"].startswith("http")]:
                 url = urlparse.urlparse(i["url"])
                 if domain:
                     if url.netloc.find(domain) != -1:
