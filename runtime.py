@@ -91,17 +91,15 @@ if __name__ == "__main__":
     parser.add_argument("--timeout",
                         help="An amount of time, in seconds, to wait for the expression to evaluate.  Defaults to 2.0",
                         type=float, default="2.0")
-    parser.add_argument("--run-forever", action="store_true",
-                        help="Run forever and wait for stdin to send expressions to the runtime environment.")
     parser.add_argument("--trace", action="store_true", help="Enable WebSocket trace output.")
-    parser.add_argument("domain", help="A domain to filter WebSocket URLs by.")
+    parser.add_argument("--domain", help="A domain to filter WebSocket URLs by.")
     args = parser.parse_args()
 
     ws_urls = remotes.get_web_socket_urls(args.url, args.domain)
 
     if not ws_urls:
         sys.exit("No Chrome Developer Tools remote debugger WebSocket URLs are available.\n" +
-                 "Is an instance of the Chrome Developer Tools open within the browser?")
+                 "Is Developer Tools open within the browser?")
 
     # Just pick the first match for now.
     ws_url = ws_urls[0]
@@ -115,17 +113,11 @@ if __name__ == "__main__":
     ws.send(get_clear_console_request())
     ws.send(get_enable_console_request())
 
-    expression = args.expression or " ".join([l.strip() for l in sys.stdin])
-
-    if args.run_forever:
-        console = code.InteractiveConsole()
-        while thread.is_alive():
-            if expression:
-                ws.send(get_eval_request(expression))
-            try:
-                expression = console.raw_input()
-            except EOFError:
-                sys.exit("--run-forever is currently not supported in combination with piped input.")
+    lines = None
+    if args.expression:
+        lines = args.expression.splitlines()
     else:
-        ws.send(get_eval_request(expression))
-        thread.join(args.timeout)
+        lines = sys.stdin
+    expression = " ".join([l.strip() for l in lines]).strip()
+    ws.send(get_eval_request(expression))
+    thread.join(args.timeout)
